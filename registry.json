@@ -1,0 +1,11 @@
+{
+  "version": "2.0",
+  "repository": "https://github.com/PurrPod/graphs",
+  "graphs": [
+    {
+      "name": "skill_eval",
+      "description": "自动化技能沙盒盲测：支持断言级 (Assertion) 的细粒度评判与官方 grading 标准统计。",
+      "graph-link": "https://github.com/PurrPod/graphs/blob/main/graphs/skill_eval.json"
+    }
+  ]
+}
