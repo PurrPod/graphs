@@ -38,6 +38,7 @@ graphs/
 | 图名 (Install ID) | 描述 |
 | :--- | :--- |
 | `skill_eval` | 自动化技能沙盒盲测：支持断言级 (Assertion) 的细粒度评判与官方 grading 标准统计。 |
+| `trading` | 股票操作分析 |
 <!-- GRAPHS:END -->
 
 ---

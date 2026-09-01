@@ -1,0 +1,1467 @@
+{
+  "version": "2.0",
+  "name": "trading",
+  "description": "股票操作分析",
+  "global_schema": {
+    "ticker": {
+      "type": "any",
+      "required": true,
+      "description": "股票代码"
+    }
+  },
+  "nodes": [
+    {
+      "id": "task_input_96yv5v",
+      "type": "task_input",
+      "name": "全局输入",
+      "position": [
+        -1912,
+        -347
+      ],
+      "config": {
+        "name": "全局输入",
+        "color": "#a3be8c",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "dynamic_outputs",
+            "type": "any",
+            "port_type": "dynamic",
+            "dynamic_rules": {
+              "watch_config": "global_vars",
+              "method": "array_map"
+            }
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "global_vars",
+            "type": "list",
+            "label": "全局变量 (Variables)",
+            "default": [],
+            "item_schema": [
+              {
+                "name": "name",
+                "type": "string",
+                "label": "变量名 (如: prompt)"
+              },
+              {
+                "name": "required",
+                "type": "boolean",
+                "label": "是否必填",
+                "default": true
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "label": "变量描述 (给用户的提示)"
+              }
+            ]
+          }
+        ],
+        "dynamic_inputs": [],
+        "global_vars": [
+          {
+            "name": "ticker",
+            "required": true,
+            "description": "股票代码"
+          }
+        ]
+      }
+    },
+    {
+      "id": "template_renderer_n36eb9",
+      "type": "template_renderer",
+      "name": "User-采集模板",
+      "position": [
+        -1443,
+        -187
+      ],
+      "config": {
+        "name": "User-采集模板",
+        "color": "#E67E22",
+        "inputs": [
+          {
+            "name": "template",
+            "type": "string",
+            "port_type": "static",
+            "description": "Jinja2 模板字符串，若未提供则使用配置中的模板。使用 {{variable_name}} 语法引用变量"
+          },
+          {
+            "name": "dynamic_vars",
+            "type": "any",
+            "port_type": "dynamic",
+            "dynamic_rules": {
+              "watch_config": "template",
+              "method": "regex",
+              "pattern": "\\{\\{\\s*([a-zA-Z0-9_]+)\\s*\\}\\}"
+            },
+            "description": "动态变量端口，根据模板中的 {{variable_name}} 自动生成，用于接收需要注入的变量值"
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rendered_text",
+            "type": "string",
+            "port_type": "static",
+            "description": "渲染后的最终文本结果"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "template",
+            "type": "textarea",
+            "label": "Jinja2 模板",
+            "description": "Jinja2 模板字符串，使用 {{variable_name}} 语法引用变量。支持条件判断、循环等 Jinja2 特性"
+          }
+        ],
+        "dynamic_inputs": [],
+        "template": "请为股票 【{{ticker}}】 收集所有必要的原始数据（基础信息、量价数据、近期新闻）。收集完毕后，使用 task_done 工具输出包含所有数据的结构化 summary。\n\n可用的参考工具：{{mcp}}"
+      }
+    },
+    {
+      "id": "message_card_builder_5torgs",
+      "type": "message_card_builder",
+      "name": "User卡片-采集",
+      "position": [
+        -1060,
+        83
+      ],
+      "config": {
+        "name": "User卡片-采集",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "user"
+      }
+    },
+    {
+      "id": "message_card_builder_kj49eu",
+      "type": "message_card_builder",
+      "name": "Sys-数据采集员",
+      "position": [
+        -1048,
+        -546
+      ],
+      "config": {
+        "name": "Sys-数据采集员",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "system",
+        "content": "你是一位高效的【数据采集工程师】。你的任务是使用工具客观地收集市场数据，不做任何主观分析。\n\n可用工具（MCP Server: `tdx`）\n\n请尽可能全面地收集所有重要数据整合在你的 summary 输出中。"
+      }
+    },
+    {
+      "id": "appender_xwmc2m",
+      "type": "appender",
+      "name": "组装-采集",
+      "position": [
+        -412,
+        132
+      ],
+      "config": {
+        "name": "组装-采集",
+        "color": "#27AE60",
+        "inputs": [
+          {
+            "name": "base_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "基础列表"
+          },
+          {
+            "name": "append_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "要追加的列表"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "merged_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "合并后的列表"
+          }
+        ],
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "agent_loop_egzm5d",
+      "type": "agent_loop",
+      "name": "Agent-数据采集",
+      "position": [
+        60,
+        22
+      ],
+      "config": {
+        "name": "Agent-数据采集",
+        "color": "#16A085",
+        "inputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "消息上下文",
+            "required": true
+          },
+          {
+            "name": "target_files",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
+            "required": false
+          },
+          {
+            "name": "task_done_info",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "完整的消息历史"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "port_type": "static",
+            "description": "任务完成的总结信息"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "target_files",
+            "type": "string",
+            "label": "强制验收文件列表",
+            "default": "",
+            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
+          },
+          {
+            "name": "task_done_info",
+            "type": "json",
+            "label": "任务完结强校验字段 (JSON)",
+            "default": {},
+            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
+          }
+        ],
+        "dynamic_inputs": [],
+        "task_done_info": {
+          "company_info": "公司基础行情与宏观状态",
+          "price_data": "最新报价数据",
+          "news_headlines": "近期重要新闻列表"
+        }
+      }
+    },
+    {
+      "id": "message_card_builder_3c2gt2",
+      "type": "message_card_builder",
+      "name": "User-分配基本面",
+      "position": [
+        430,
+        -574
+      ],
+      "config": {
+        "name": "User-分配基本面",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "user",
+        "content": "你现在是【基本面分析师】。请阅读上述已采集的数据，分析对应股票的基本面，进行多空博弈评估，最后以JSON格式输出你的看多/看空 summary。"
+      }
+    },
+    {
+      "id": "appender_z2li2w",
+      "type": "appender",
+      "name": "追加上下文-资金面",
+      "position": [
+        868,
+        -400
+      ],
+      "config": {
+        "name": "追加上下文-资金面",
+        "color": "#27AE60",
+        "inputs": [
+          {
+            "name": "base_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "基础列表"
+          },
+          {
+            "name": "append_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "要追加的列表"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "merged_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "合并后的列表"
+          }
+        ],
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "agent_loop_qjnp6d",
+      "type": "agent_loop",
+      "name": "Agent-资金面",
+      "position": [
+        1292,
+        -588
+      ],
+      "config": {
+        "name": "Agent-资金面",
+        "color": "#16A085",
+        "inputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "消息上下文",
+            "required": true
+          },
+          {
+            "name": "target_files",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
+            "required": false
+          },
+          {
+            "name": "task_done_info",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "完整的消息历史"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "port_type": "static",
+            "description": "任务完成的总结信息"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "target_files",
+            "type": "string",
+            "label": "强制验收文件列表",
+            "default": "",
+            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
+          },
+          {
+            "name": "task_done_info",
+            "type": "json",
+            "label": "任务完结强校验字段 (JSON)",
+            "default": {},
+            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
+          }
+        ],
+        "dynamic_inputs": [],
+        "task_done_info": {
+          "bias": "看多/看空",
+          "valuation_result": "资金主力定位结论",
+          "analysis": "期权异动正文分析"
+        }
+      }
+    },
+    {
+      "id": "message_card_builder_8f4qe7",
+      "type": "message_card_builder",
+      "name": "User-分配技术面",
+      "position": [
+        436,
+        -64
+      ],
+      "config": {
+        "name": "User-分配技术面",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "user",
+        "content": "你现在是【技术面分析师】。请阅读上述已采集的数据，分析对应股票的技术面，预测短期趋势，并输出 summary。"
+      }
+    },
+    {
+      "id": "appender_dhvrsp",
+      "type": "appender",
+      "name": "追加上下文-技术面",
+      "position": [
+        900,
+        60
+      ],
+      "config": {
+        "name": "追加上下文-技术面",
+        "color": "#27AE60",
+        "inputs": [
+          {
+            "name": "base_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "基础列表"
+          },
+          {
+            "name": "append_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "要追加的列表"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "merged_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "合并后的列表"
+          }
+        ],
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "agent_loop_5bx0s6",
+      "type": "agent_loop",
+      "name": "Agent-技术面",
+      "position": [
+        1302,
+        -80
+      ],
+      "config": {
+        "name": "Agent-技术面",
+        "color": "#16A085",
+        "inputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "消息上下文",
+            "required": true
+          },
+          {
+            "name": "target_files",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
+            "required": false
+          },
+          {
+            "name": "task_done_info",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "完整的消息历史"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "port_type": "static",
+            "description": "任务完成的总结信息"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "target_files",
+            "type": "string",
+            "label": "强制验收文件列表",
+            "default": "",
+            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
+          },
+          {
+            "name": "task_done_info",
+            "type": "json",
+            "label": "任务完结强校验字段 (JSON)",
+            "default": {},
+            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
+          }
+        ],
+        "dynamic_inputs": [],
+        "task_done_info": {
+          "trend": "上涨/下跌/震荡",
+          "key_levels": "关键技术支撑/阻力",
+          "analysis": "技术指标正文分析"
+        }
+      }
+    },
+    {
+      "id": "message_card_builder_bega7b",
+      "type": "message_card_builder",
+      "name": "User-分配情绪面",
+      "position": [
+        480,
+        490
+      ],
+      "config": {
+        "name": "User-分配情绪面",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "user",
+        "content": "你现在是【市场情绪分析师】。请阅读采集到的新闻，判断对应股票的市场散户情绪极性，并输出 summary。"
+      }
+    },
+    {
+      "id": "appender_36w9f9",
+      "type": "appender",
+      "name": "追加上下文-情绪面",
+      "position": [
+        884,
+        480
+      ],
+      "config": {
+        "name": "追加上下文-情绪面",
+        "color": "#27AE60",
+        "inputs": [
+          {
+            "name": "base_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "基础列表"
+          },
+          {
+            "name": "append_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "要追加的列表"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "merged_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "合并后的列表"
+          }
+        ],
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "agent_loop_yx5ayh",
+      "type": "agent_loop",
+      "name": "Agent-情绪面",
+      "position": [
+        1310,
+        468
+      ],
+      "config": {
+        "name": "Agent-情绪面",
+        "color": "#16A085",
+        "inputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "消息上下文",
+            "required": true
+          },
+          {
+            "name": "target_files",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
+            "required": false
+          },
+          {
+            "name": "task_done_info",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "完整的消息历史"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "port_type": "static",
+            "description": "任务完成的总结信息"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "target_files",
+            "type": "string",
+            "label": "强制验收文件列表",
+            "default": "",
+            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
+          },
+          {
+            "name": "task_done_info",
+            "type": "json",
+            "label": "任务完结强校验字段 (JSON)",
+            "default": {},
+            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
+          }
+        ],
+        "dynamic_inputs": [],
+        "task_done_info": {
+          "sentiment_score": "情绪极性(看涨/看跌/中性)",
+          "catalysts": "近期新闻或社群催化剂",
+          "analysis": "舆情正文分析"
+        }
+      }
+    },
+    {
+      "id": "template_renderer_v0nlop",
+      "type": "template_renderer",
+      "name": "PM决策板 (Barrier)",
+      "position": [
+        1766,
+        -74
+      ],
+      "config": {
+        "name": "PM决策板 (Barrier)",
+        "color": "#E67E22",
+        "inputs": [
+          {
+            "name": "template",
+            "type": "string",
+            "port_type": "static",
+            "description": "Jinja2 模板字符串，若未提供则使用配置中的模板。使用 {{variable_name}} 语法引用变量"
+          },
+          {
+            "name": "dynamic_vars",
+            "type": "any",
+            "port_type": "dynamic",
+            "dynamic_rules": {
+              "watch_config": "template",
+              "method": "regex",
+              "pattern": "\\{\\{\\s*([a-zA-Z0-9_]+)\\s*\\}\\}"
+            },
+            "description": "动态变量端口，根据模板中的 {{variable_name}} 自动生成，用于接收需要注入的变量值"
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rendered_text",
+            "type": "string",
+            "port_type": "static",
+            "description": "渲染后的最终文本结果"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "template",
+            "type": "textarea",
+            "label": "Jinja2 模板",
+            "description": "Jinja2 模板字符串，使用 {{variable_name}} 语法引用变量。支持条件判断、循环等 Jinja2 特性"
+          }
+        ],
+        "dynamic_inputs": [],
+        "template": "以下是三位分析师对该股票的独立分析报告：\n\n【基本面】\n{{fund}}\n\n【技术面】\n{{tech}}\n\n【情绪面】\n{{sent}}\n\n请结合以上维度进行最终投资决策。"
+      }
+    },
+    {
+      "id": "message_card_builder_opiqy2",
+      "type": "message_card_builder",
+      "name": "User-PM提问",
+      "position": [
+        2158,
+        202
+      ],
+      "config": {
+        "name": "User-PM提问",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "user"
+      }
+    },
+    {
+      "id": "message_card_builder_04v8t0",
+      "type": "message_card_builder",
+      "name": "Sys-投资经理",
+      "position": [
+        2154,
+        -330
+      ],
+      "config": {
+        "name": "Sys-投资经理",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息内容",
+            "required": true
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "port_type": "static",
+            "description": "消息角色 (system/user/assistant)",
+            "required": false
+          },
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。如果不连线，节点将在开局自动执行；如果连线，将等待收到上游数据/信号后再执行。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "message_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "标准消息列表"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "content",
+            "type": "string",
+            "label": "消息内容",
+            "default": ""
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "label": "消息角色",
+            "default": "user"
+          }
+        ],
+        "dynamic_inputs": [],
+        "role": "system",
+        "content": "你是首席【投资组合经理 (PM)】。请综合下属提交的三份报告（资金期权、技术形态、市场情绪），进行多空逻辑辩论，评估潜在风险并给出操作评级。本环节直接基于报告进行大脑推演，无需额外调用工具。最后输出包含 'action' 的最终决策。"
+      }
+    },
+    {
+      "id": "appender_5pr5v2",
+      "type": "appender",
+      "name": "组装-PM",
+      "position": [
+        2548,
+        42
+      ],
+      "config": {
+        "name": "组装-PM",
+        "color": "#27AE60",
+        "inputs": [
+          {
+            "name": "base_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "基础列表"
+          },
+          {
+            "name": "append_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "要追加的列表"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "merged_list",
+            "type": "array",
+            "port_type": "static",
+            "description": "合并后的列表"
+          }
+        ],
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "agent_loop_5d9yxg",
+      "type": "agent_loop",
+      "name": "Agent-PM决策",
+      "position": [
+        3016,
+        -114
+      ],
+      "config": {
+        "name": "Agent-PM决策",
+        "color": "#16A085",
+        "inputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "消息上下文",
+            "required": true
+          },
+          {
+            "name": "target_files",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
+            "required": false
+          },
+          {
+            "name": "task_done_info",
+            "type": "string",
+            "port_type": "static",
+            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "messages",
+            "type": "array",
+            "port_type": "static",
+            "description": "完整的消息历史"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "port_type": "static",
+            "description": "任务完成的总结信息"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "target_files",
+            "type": "string",
+            "label": "强制验收文件列表",
+            "default": "",
+            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
+          },
+          {
+            "name": "task_done_info",
+            "type": "json",
+            "label": "任务完结强校验字段 (JSON)",
+            "default": {},
+            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
+          }
+        ],
+        "dynamic_inputs": [],
+        "task_done_info": {
+          "action": "Buy/Sell/Hold",
+          "confidence": "0-100",
+          "final_reason": "核心决策逻辑"
+        }
+      }
+    },
+    {
+      "id": "human_intervention_e1ze3f",
+      "type": "human_intervention",
+      "name": "人工风控审核",
+      "position": [
+        3506,
+        -40
+      ],
+      "config": {
+        "name": "人工风控审核",
+        "color": "#d08770",
+        "inputs": [
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "执行到此节点即触发挂起"
+          },
+          {
+            "name": "context_data",
+            "type": "any",
+            "port_type": "static",
+            "description": "（可选）需要人类审核的上游数据。连线后可以在提示中展示给人类看。"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "human_reply",
+            "type": "string",
+            "port_type": "static",
+            "description": "人类在前端输入的答复指令"
+          },
+          {
+            "name": "context_data",
+            "type": "any",
+            "port_type": "static",
+            "description": "透传上游传入的审查数据，方便下游一并使用"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "prompt_message",
+            "type": "string",
+            "label": "向人类提问的文案",
+            "default": "流程已暂停，请审查以上数据并输入您的指示：",
+            "description": "挂起时会在日志中展示给用户的提示语"
+          }
+        ],
+        "dynamic_inputs": [],
+        "prompt_message": "🚨 投资方案已生成，请检查。输入 'ok' 批准交易，或输入理由打回重审："
+      }
+    },
+    {
+      "id": "task_output_ttj7q8",
+      "type": "task_output",
+      "name": "全局输出",
+      "position": [
+        3956,
+        -8
+      ],
+      "config": {
+        "name": "全局输出",
+        "color": "#EBCB8B",
+        "inputs": [
+          {
+            "name": "dynamic_inputs",
+            "type": "any",
+            "port_type": "dynamic",
+            "dynamic_rules": {
+              "watch_config": "target_vars",
+              "method": "array_map"
+            }
+          }
+        ],
+        "outputs": [],
+        "configSchema": [
+          {
+            "name": "target_vars",
+            "type": "list",
+            "label": "输出目标 (Targets)",
+            "default": []
+          }
+        ],
+        "dynamic_inputs": [],
+        "target_vars": [
+          {
+            "name": "final_decision",
+            "type": "any"
+          },
+          {
+            "name": "human_instruction",
+            "type": "string"
+          }
+        ],
+        "exposed_keys": [
+          "final_decision",
+          "human_instruction"
+        ]
+      }
+    },
+    {
+      "id": "mcp_info_ph3nye",
+      "type": "mcp_info",
+      "name": "MCP 知识包 (MCP Kit)",
+      "position": [
+        -1932,
+        62
+      ],
+      "config": {
+        "name": "MCP 知识包 (MCP Kit)",
+        "color": "#3498DB",
+        "inputs": [
+          {
+            "name": "trigger",
+            "type": "any",
+            "port_type": "static",
+            "description": "触发信号（可选）。",
+            "required": false
+          }
+        ],
+        "outputs": [
+          {
+            "name": "mcp_kit_string",
+            "type": "string",
+            "port_type": "static",
+            "description": "格式化后的 MCP 提示词"
+          }
+        ],
+        "configSchema": [
+          {
+            "name": "mcp_servers",
+            "type": "list",
+            "label": "推荐 MCP 服务器 (Servers)",
+            "default": [],
+            "description": "添加推荐给 Agent 的 MCP 服务器名称",
+            "item_schema": [
+              {
+                "name": "name",
+                "type": "string",
+                "label": "服务器名 (例如: tradingview)"
+              }
+            ]
+          }
+        ],
+        "dynamic_inputs": [],
+        "mcp_servers": [
+          {
+            "name": "tdx"
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "task_input_96yv5v",
+      "target": "template_renderer_n36eb9",
+      "sourceHandle": "ticker",
+      "targetHandle": "ticker"
+    },
+    {
+      "source": "template_renderer_n36eb9",
+      "target": "message_card_builder_5torgs",
+      "sourceHandle": "rendered_text",
+      "targetHandle": "content"
+    },
+    {
+      "source": "message_card_builder_kj49eu",
+      "target": "appender_xwmc2m",
+      "sourceHandle": "message_list",
+      "targetHandle": "base_list"
+    },
+    {
+      "source": "message_card_builder_5torgs",
+      "target": "appender_xwmc2m",
+      "sourceHandle": "message_list",
+      "targetHandle": "append_list"
+    },
+    {
+      "source": "appender_xwmc2m",
+      "target": "agent_loop_egzm5d",
+      "sourceHandle": "merged_list",
+      "targetHandle": "messages"
+    },
+    {
+      "source": "agent_loop_egzm5d",
+      "target": "appender_z2li2w",
+      "sourceHandle": "messages",
+      "targetHandle": "base_list"
+    },
+    {
+      "source": "message_card_builder_3c2gt2",
+      "target": "appender_z2li2w",
+      "sourceHandle": "message_list",
+      "targetHandle": "append_list"
+    },
+    {
+      "source": "appender_z2li2w",
+      "target": "agent_loop_qjnp6d",
+      "sourceHandle": "merged_list",
+      "targetHandle": "messages"
+    },
+    {
+      "source": "agent_loop_egzm5d",
+      "target": "appender_dhvrsp",
+      "sourceHandle": "messages",
+      "targetHandle": "base_list"
+    },
+    {
+      "source": "message_card_builder_8f4qe7",
+      "target": "appender_dhvrsp",
+      "sourceHandle": "message_list",
+      "targetHandle": "append_list"
+    },
+    {
+      "source": "appender_dhvrsp",
+      "target": "agent_loop_5bx0s6",
+      "sourceHandle": "merged_list",
+      "targetHandle": "messages"
+    },
+    {
+      "source": "agent_loop_egzm5d",
+      "target": "appender_36w9f9",
+      "sourceHandle": "messages",
+      "targetHandle": "base_list"
+    },
+    {
+      "source": "message_card_builder_bega7b",
+      "target": "appender_36w9f9",
+      "sourceHandle": "message_list",
+      "targetHandle": "append_list"
+    },
+    {
+      "source": "appender_36w9f9",
+      "target": "agent_loop_yx5ayh",
+      "sourceHandle": "merged_list",
+      "targetHandle": "messages"
+    },
+    {
+      "source": "agent_loop_qjnp6d",
+      "target": "template_renderer_v0nlop",
+      "sourceHandle": "summary",
+      "targetHandle": "fund"
+    },
+    {
+      "source": "agent_loop_5bx0s6",
+      "target": "template_renderer_v0nlop",
+      "sourceHandle": "summary",
+      "targetHandle": "tech"
+    },
+    {
+      "source": "agent_loop_yx5ayh",
+      "target": "template_renderer_v0nlop",
+      "sourceHandle": "summary",
+      "targetHandle": "sent"
+    },
+    {
+      "source": "template_renderer_v0nlop",
+      "target": "message_card_builder_opiqy2",
+      "sourceHandle": "rendered_text",
+      "targetHandle": "content"
+    },
+    {
+      "source": "message_card_builder_04v8t0",
+      "target": "appender_5pr5v2",
+      "sourceHandle": "message_list",
+      "targetHandle": "base_list"
+    },
+    {
+      "source": "message_card_builder_opiqy2",
+      "target": "appender_5pr5v2",
+      "sourceHandle": "message_list",
+      "targetHandle": "append_list"
+    },
+    {
+      "source": "appender_5pr5v2",
+      "target": "agent_loop_5d9yxg",
+      "sourceHandle": "merged_list",
+      "targetHandle": "messages"
+    },
+    {
+      "source": "agent_loop_5d9yxg",
+      "target": "human_intervention_e1ze3f",
+      "sourceHandle": "summary",
+      "targetHandle": "context_data"
+    },
+    {
+      "source": "human_intervention_e1ze3f",
+      "target": "task_output_ttj7q8",
+      "sourceHandle": "context_data",
+      "targetHandle": "final_decision"
+    },
+    {
+      "source": "human_intervention_e1ze3f",
+      "target": "task_output_ttj7q8",
+      "sourceHandle": "human_reply",
+      "targetHandle": "human_instruction"
+    },
+    {
+      "source": "mcp_info_ph3nye",
+      "target": "template_renderer_n36eb9",
+      "sourceHandle": "mcp_kit_string",
+      "targetHandle": "mcp"
+    }
+  ],
+  "dependencies": {
+    "skills": [],
+    "mcps": [
+      "tdx"
+    ]
+  }
+}
