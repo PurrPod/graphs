@@ -4,7 +4,7 @@
 目录约定:
   graphs/<graph-name>.json   每个 graph 对应一个独立 JSON 文件
 
-统一字段: name / description  (graph 文件本身的其它字段如 nodes/edges 等由运行时解析，不进入注册表)
+统一字段: name / description (英文) / description-zh (中文)  (graph 文件本身的其它字段如 nodes/edges 等由运行时解析，不进入注册表)
 """
 import json
 import os
@@ -16,7 +16,7 @@ REPO_URL = "https://github.com/PurrPod/graphs"
 
 GRAPHS_DIR = "graphs"
 
-REQUIRED_FIELDS = ("name", "description")
+REQUIRED_FIELDS = ("name", "description", "description-zh")
 
 
 def fail(msg):
@@ -48,9 +48,11 @@ def validate_entry(filepath, entry, expected_name):
     if name != expected_name:
         fail(f"[{filepath}] 'name' ('{name}') 必须与文件名 ('{expected_name}') 一致")
 
-    # 校验 2: description 不能为空
+    # 校验 2: description / description-zh 不能为空
     if not str(entry.get("description", "")).strip():
         fail(f"[{filepath}] 'description' 不能为空")
+    if not str(entry.get("description-zh", "")).strip():
+        fail(f"[{filepath}] 'description-zh' 不能为空")
 
 
 def normalize(entry, filename):
@@ -58,6 +60,7 @@ def normalize(entry, filename):
     return {
         "name": entry["name"],
         "description": entry["description"],
+        "description-zh": entry["description-zh"],
         "graph-link": f"{REPO_URL}/blob/main/{GRAPHS_DIR}/{filename}",
     }
 
@@ -95,7 +98,7 @@ def generate_markdown_table(entries):
 
     for short_id, info in sorted(entries):
         name = info["name"]
-        desc = str(info["description"]).replace("|", "\\|")
+        desc = str(info["description-zh"]).replace("|", "\\|")
         lines.append(f"| `{name}` | {desc} |")
 
     return "\n".join(lines) + "\n"

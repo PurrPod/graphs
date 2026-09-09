@@ -51,7 +51,8 @@ graphs/
 {
   "version": "2.0",
   "name": "skill_eval",
-  "description": "自动化技能沙盒盲测：支持断言级 (Assertion) 的细粒度评判与官方 grading 标准统计。",
+  "description": "Automated blind skill evaluation in a sandbox: supports fine-grained assertion-level grading and statistics against official grading standards.",
+  "description-zh": "自动化技能沙盒盲测：支持断言级 (Assertion) 的细粒度评判与官方 grading 标准统计。",
   "global_schema": { ... },
   "nodes": [ ... ],
   "edges": [ ... ]
@@ -61,7 +62,8 @@ graphs/
 ### 必填字段
 
 * **`name`** (必填): 安装标识，必须与 JSON 文件名（去掉 `.json`）完全一致。
-* **`description`** (必填): 一句话描述该 Graph 的用途。
+* **`description`** (必填): 英文描述，一句话描述该 Graph 的用途。
+* **`description-zh`** (必填): 中文描述，用于市场中文展示。
 
 ### 可选字段
 
@@ -90,13 +92,13 @@ graphs/
 在 `graphs/` 目录下新建 `<graph-name>.json`，包含：
 
 1. `name`：与文件名一致的图名。
-2. `description`：一句话描述。
+2. `description` / `description-zh`：英文与中文描述。
 3. `global_schema` / `nodes` / `edges` 等运行时所需的图定义字段。
 
 提交 Pull Request。CI 会自动校验：
 
 * 文件名与 `name` 字段严格一致；
-* JSON 可解析且包含 `name` 与 `description` 两个必填字段；
-* `description` 不能为空。
+* JSON 可解析且包含 `name`、`description` 与 `description-zh` 三个必填字段；
+* `description` 与 `description-zh` 不能为空。
 
 PR 审核通过并合并后，流水线将自动把所有 graph 合并为全局注册表 `registry.json`，并重写本文档的 graph 清单。

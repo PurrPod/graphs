@@ -1,7 +1,8 @@
 {
   "version": "2.0",
   "name": "trading",
-  "description": "股票操作分析",
+  "description": "Stock trading operation analysis.",
+  "description-zh": "股票操作分析",
   "global_schema": {
     "ticker": {
       "type": "any",
