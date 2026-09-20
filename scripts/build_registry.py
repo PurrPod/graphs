@@ -2,7 +2,9 @@
 """构建 graphs 的 registry.json 并同步 README.md
 
 目录约定:
-  graphs/<graph-name>.json   每个 graph 对应一个独立 JSON 文件
+  graphs/<graph-name>/graph.json   graph 定义（必需）
+  graphs/<graph-name>/asset/...    graph 附带资源（可选）
+  每个 graph 是一个独立文件夹，registry 记录完整文件清单供客户端整目录下载
 
 统一字段: name / description (英文) / description-zh (中文)  (graph 文件本身的其它字段如 nodes/edges 等由运行时解析，不进入注册表)
 """
@@ -32,56 +34,70 @@ def load_json(filepath):
         fail(f"无法读取或解析 {filepath}: {e}")
 
 
-def validate_entry(filepath, entry, expected_name):
+def list_graph_files(graph_dir):
+    """列出 graph 文件夹内全部文件的相对路径（含 graph.json 与 asset/*），按路径排序"""
+    rels = []
+    for root, _dirs, files in os.walk(graph_dir):
+        for fn in files:
+            full = os.path.join(root, fn)
+            rel = os.path.relpath(full, graph_dir).replace(os.sep, "/")
+            rels.append(rel)
+    return sorted(rels)
+
+
+def validate_entry(graph_dir, entry, expected_name):
     """校验单个 graph 条目"""
+    graph_json = os.path.join(graph_dir, "graph.json")
     if not isinstance(entry, dict):
-        fail(f"[{filepath}] 内容必须是一个 JSON 对象")
+        fail(f"[{graph_json}] 内容必须是一个 JSON 对象")
 
     for field in REQUIRED_FIELDS:
         if field not in entry:
-            fail(f"[{filepath}] 缺少必填字段 '{field}'")
+            fail(f"[{graph_json}] 缺少必填字段 '{field}'")
 
-    # 校验 1: name 必须与文件名 (去掉 .json) 一致
+    # 校验 1: name 必须与文件夹名一致
     name = str(entry.get("name", "")).strip()
     if not name:
-        fail(f"[{filepath}] 'name' 不能为空")
+        fail(f"[{graph_json}] 'name' 不能为空")
     if name != expected_name:
-        fail(f"[{filepath}] 'name' ('{name}') 必须与文件名 ('{expected_name}') 一致")
+        fail(f"[{graph_json}] 'name' ('{name}') 必须与文件夹名 ('{expected_name}') 一致")
 
     # 校验 2: description / description-zh 不能为空
     if not str(entry.get("description", "")).strip():
-        fail(f"[{filepath}] 'description' 不能为空")
+        fail(f"[{graph_json}] 'description' 不能为空")
     if not str(entry.get("description-zh", "")).strip():
-        fail(f"[{filepath}] 'description-zh' 不能为空")
+        fail(f"[{graph_json}] 'description-zh' 不能为空")
 
 
-def normalize(entry, filename):
+def normalize(entry, graph_name, files):
     """输出为统一的注册表条目，仅保留约定的字段"""
     return {
         "name": entry["name"],
         "description": entry["description"],
         "description-zh": entry["description-zh"],
-        "graph-link": f"{REPO_URL}/blob/main/{GRAPHS_DIR}/{filename}",
+        "graph-link": f"{REPO_URL}/tree/main/{GRAPHS_DIR}/{graph_name}",
+        "files": files,
     }
 
 
 def scan_graphs():
-    """扫描 graphs/ 下的 graph JSON 文件"""
+    """扫描 graphs/ 下的 graph 文件夹（每个文件夹必须含 graph.json）"""
     entries = []
     if not os.path.isdir(GRAPHS_DIR):
         return entries
 
     for item in sorted(os.listdir(GRAPHS_DIR)):
-        if item.startswith(".") or not item.endswith(".json"):
-            continue
-        filepath = os.path.join(GRAPHS_DIR, item)
-        if not os.path.isfile(filepath):
+        graph_dir = os.path.join(GRAPHS_DIR, item)
+        if item.startswith(".") or not os.path.isdir(graph_dir):
             continue
 
-        expected_name = item[: -len(".json")]
-        entry = load_json(filepath)
-        validate_entry(filepath, entry, expected_name)
-        entries.append((expected_name, normalize(entry, item)))
+        graph_json = os.path.join(graph_dir, "graph.json")
+        if not os.path.isfile(graph_json):
+            fail(f"[{graph_dir}] 缺少 graph.json")
+
+        entry = load_json(graph_json)
+        validate_entry(graph_dir, entry, item)
+        entries.append((item, normalize(entry, item, list_graph_files(graph_dir))))
     return entries
 
 
@@ -142,7 +158,7 @@ def main():
         fail(f"存在同名 graph: {', '.join(duplicates)}")
 
     registry = {
-        "version": "2.0",
+        "version": "3.0",
         "repository": REPO_URL,
         "graphs": [info for _, info in entries],
     }

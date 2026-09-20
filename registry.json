@@ -1,18 +1,24 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "repository": "https://github.com/PurrPod/graphs",
   "graphs": [
     {
       "name": "skill_eval",
       "description": "Automated blind skill evaluation in a sandbox: supports fine-grained assertion-level grading and statistics against official grading standards.",
       "description-zh": "自动化技能沙盒盲测：支持断言级 (Assertion) 的细粒度评判与官方 grading 标准统计。",
-      "graph-link": "https://github.com/PurrPod/graphs/blob/main/graphs/skill_eval.json"
+      "graph-link": "https://github.com/PurrPod/graphs/tree/main/graphs/skill_eval",
+      "files": [
+        "graph.json"
+      ]
     },
     {
       "name": "trading",
       "description": "Stock trading operation analysis.",
       "description-zh": "股票操作分析",
-      "graph-link": "https://github.com/PurrPod/graphs/blob/main/graphs/trading.json"
+      "graph-link": "https://github.com/PurrPod/graphs/tree/main/graphs/trading",
+      "files": [
+        "graph.json"
+      ]
     }
   ]
 }

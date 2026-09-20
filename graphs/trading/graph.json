@@ -2,7 +2,7 @@
   "version": "2.0",
   "name": "trading",
   "description": "Stock trading operation analysis.",
-  "description-zh": "股票操作分析",
+  "description-zh": "[正在调试适配新架构]股票操作分析",
   "global_schema": {
     "ticker": {
       "type": "any",
@@ -123,8 +123,7 @@
             "description": "Jinja2 模板字符串，使用 {{variable_name}} 语法引用变量。支持条件判断、循环等 Jinja2 特性"
           }
         ],
-        "dynamic_inputs": [],
-        "template": "请为股票 【{{ticker}}】 收集所有必要的原始数据（基础信息、量价数据、近期新闻）。收集完毕后，使用 task_done 工具输出包含所有数据的结构化 summary。\n\n可用的参考工具：{{mcp}}"
+        "dynamic_inputs": []
       }
     },
     {
@@ -243,9 +242,7 @@
             "default": "user"
           }
         ],
-        "dynamic_inputs": [],
-        "role": "system",
-        "content": "你是一位高效的【数据采集工程师】。你的任务是使用工具客观地收集市场数据，不做任何主观分析。\n\n可用工具（MCP Server: `tdx`）\n\n请尽可能全面地收集所有重要数据整合在你的 summary 输出中。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -413,9 +410,7 @@
             "default": "user"
           }
         ],
-        "dynamic_inputs": [],
-        "role": "user",
-        "content": "你现在是【基本面分析师】。请阅读上述已采集的数据，分析对应股票的基本面，进行多空博弈评估，最后以JSON格式输出你的看多/看空 summary。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -583,9 +578,7 @@
             "default": "user"
           }
         ],
-        "dynamic_inputs": [],
-        "role": "user",
-        "content": "你现在是【技术面分析师】。请阅读上述已采集的数据，分析对应股票的技术面，预测短期趋势，并输出 summary。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -753,9 +746,7 @@
             "default": "user"
           }
         ],
-        "dynamic_inputs": [],
-        "role": "user",
-        "content": "你现在是【市场情绪分析师】。请阅读采集到的新闻，判断对应股票的市场散户情绪极性，并输出 summary。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -920,8 +911,7 @@
             "description": "Jinja2 模板字符串，使用 {{variable_name}} 语法引用变量。支持条件判断、循环等 Jinja2 特性"
           }
         ],
-        "dynamic_inputs": [],
-        "template": "以下是三位分析师对该股票的独立分析报告：\n\n【基本面】\n{{fund}}\n\n【技术面】\n{{tech}}\n\n【情绪面】\n{{sent}}\n\n请结合以上维度进行最终投资决策。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -1040,9 +1030,7 @@
             "default": "user"
           }
         ],
-        "dynamic_inputs": [],
-        "role": "system",
-        "content": "你是首席【投资组合经理 (PM)】。请综合下属提交的三份报告（资金期权、技术形态、市场情绪），进行多空逻辑辩论，评估潜在风险并给出操作评级。本环节直接基于报告进行大脑推演，无需额外调用工具。最后输出包含 'action' 的最终决策。"
+        "dynamic_inputs": []
       }
     },
     {
@@ -1202,8 +1190,7 @@
             "description": "挂起时会在日志中展示给用户的提示语"
           }
         ],
-        "dynamic_inputs": [],
-        "prompt_message": "🚨 投资方案已生成，请检查。输入 'ok' 批准交易，或输入理由打回重审："
+        "dynamic_inputs": []
       }
     },
     {
@@ -1304,6 +1291,114 @@
             "name": "tdx"
           }
         ]
+      }
+    },
+    {
+      "id": "string_message_card_builder_kj49eu",
+      "type": "string",
+      "name": "文本-Sys-数据采集员",
+      "position": [
+        -1408,
+        -666
+      ],
+      "config": {
+        "value": "你是一位高效的【数据采集工程师】。你的任务是使用工具客观地收集市场数据，不做任何主观分析。\n\n可用工具（MCP Server: `tdx`）\n\n请尽可能全面地收集所有重要数据整合在你的 summary 输出中。"
+      }
+    },
+    {
+      "id": "string_message_card_builder_3c2gt2",
+      "type": "string",
+      "name": "文本-User-分配基本面",
+      "position": [
+        70,
+        -694
+      ],
+      "config": {
+        "value": "你现在是【基本面分析师】。请阅读上述已采集的数据，分析对应股票的基本面，进行多空博弈评估，最后以JSON格式输出你的看多/看空 summary。"
+      }
+    },
+    {
+      "id": "string_message_card_builder_8f4qe7",
+      "type": "string",
+      "name": "文本-User-分配技术面",
+      "position": [
+        76,
+        -184
+      ],
+      "config": {
+        "value": "你现在是【技术面分析师】。请阅读上述已采集的数据，分析对应股票的技术面，预测短期趋势，并输出 summary。"
+      }
+    },
+    {
+      "id": "string_message_card_builder_bega7b",
+      "type": "string",
+      "name": "文本-User-分配情绪面",
+      "position": [
+        120,
+        370
+      ],
+      "config": {
+        "value": "你现在是【市场情绪分析师】。请阅读采集到的新闻，判断对应股票的市场散户情绪极性，并输出 summary。"
+      }
+    },
+    {
+      "id": "string_message_card_builder_04v8t0",
+      "type": "string",
+      "name": "文本-Sys-投资经理",
+      "position": [
+        1794,
+        -450
+      ],
+      "config": {
+        "value": "你是首席【投资组合经理 (PM)】。请综合下属提交的三份报告（资金期权、技术形态、市场情绪），进行多空逻辑辩论，评估潜在风险并给出操作评级。本环节直接基于报告进行大脑推演，无需额外调用工具。最后输出包含 'action' 的最终决策。"
+      }
+    },
+    {
+      "id": "system_role_str",
+      "type": "string",
+      "name": "角色-系统",
+      "position": [
+        -1080,
+        -780
+      ],
+      "config": {
+        "value": "system"
+      }
+    },
+    {
+      "id": "string_hi_prompt",
+      "type": "string",
+      "name": "文本-人工审核提示",
+      "position": [
+        3146,
+        -160
+      ],
+      "config": {
+        "value": "🚨 投资方案已生成，请检查。输入 'ok' 批准交易，或输入理由打回重审："
+      }
+    },
+    {
+      "id": "string_tpl_template_renderer_n36eb9",
+      "type": "string",
+      "name": "模板-User-采集模板",
+      "position": [
+        -1823,
+        -307
+      ],
+      "config": {
+        "value": "请为股票 【{{ticker}}】 收集所有必要的原始数据（基础信息、量价数据、近期新闻）。收集完毕后，使用 task_done 工具输出包含所有数据的结构化 summary。\n\n可用的参考工具：{{mcp}}"
+      }
+    },
+    {
+      "id": "string_tpl_template_renderer_v0nlop",
+      "type": "string",
+      "name": "模板-PM决策板 (Barrier)",
+      "position": [
+        1386,
+        -194
+      ],
+      "config": {
+        "value": "以下是三位分析师对该股票的独立分析报告：\n\n【基本面】\n{{fund}}\n\n【技术面】\n{{tech}}\n\n【情绪面】\n{{sent}}\n\n请结合以上维度进行最终投资决策。"
       }
     }
   ],
@@ -1457,6 +1552,66 @@
       "target": "template_renderer_n36eb9",
       "sourceHandle": "mcp_kit_string",
       "targetHandle": "mcp"
+    },
+    {
+      "source": "string_message_card_builder_kj49eu",
+      "sourceHandle": "text",
+      "target": "message_card_builder_kj49eu",
+      "targetHandle": "content"
+    },
+    {
+      "source": "string_message_card_builder_3c2gt2",
+      "sourceHandle": "text",
+      "target": "message_card_builder_3c2gt2",
+      "targetHandle": "content"
+    },
+    {
+      "source": "string_message_card_builder_8f4qe7",
+      "sourceHandle": "text",
+      "target": "message_card_builder_8f4qe7",
+      "targetHandle": "content"
+    },
+    {
+      "source": "string_message_card_builder_bega7b",
+      "sourceHandle": "text",
+      "target": "message_card_builder_bega7b",
+      "targetHandle": "content"
+    },
+    {
+      "source": "string_message_card_builder_04v8t0",
+      "sourceHandle": "text",
+      "target": "message_card_builder_04v8t0",
+      "targetHandle": "content"
+    },
+    {
+      "source": "system_role_str",
+      "sourceHandle": "text",
+      "target": "message_card_builder_kj49eu",
+      "targetHandle": "role"
+    },
+    {
+      "source": "system_role_str",
+      "sourceHandle": "text",
+      "target": "message_card_builder_04v8t0",
+      "targetHandle": "role"
+    },
+    {
+      "source": "string_hi_prompt",
+      "sourceHandle": "text",
+      "target": "human_intervention_e1ze3f",
+      "targetHandle": "prompt"
+    },
+    {
+      "source": "string_tpl_template_renderer_n36eb9",
+      "sourceHandle": "text",
+      "target": "template_renderer_n36eb9",
+      "targetHandle": "template"
+    },
+    {
+      "source": "string_tpl_template_renderer_v0nlop",
+      "sourceHandle": "text",
+      "target": "template_renderer_v0nlop",
+      "targetHandle": "template"
     }
   ],
   "dependencies": {
