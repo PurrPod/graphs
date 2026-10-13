@@ -302,17 +302,14 @@
             "required": true
           },
           {
-            "name": "target_files",
-            "type": "string",
+            "name": "agentloop",
+            "type": [
+              "string",
+              "jsonstring",
+              "any"
+            ],
             "port_type": "static",
-            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
-            "required": false
-          },
-          {
-            "name": "task_done_info",
-            "type": "string",
-            "port_type": "static",
-            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "description": "符合 YAML 格式的 agentloop（范式）；也可传范式名或绝对路径。",
             "required": false
           }
         ],
@@ -330,28 +327,20 @@
             "description": "任务完成的总结信息"
           }
         ],
-        "configSchema": [
-          {
-            "name": "target_files",
-            "type": "string",
-            "label": "强制验收文件列表",
-            "default": "",
-            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
-          },
-          {
-            "name": "task_done_info",
-            "type": "json",
-            "label": "任务完结强校验字段 (JSON)",
-            "default": {},
-            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
-          }
-        ],
-        "dynamic_inputs": [],
-        "task_done_info": {
-          "company_info": "公司基础行情与宏观状态",
-          "price_data": "最新报价数据",
-          "news_headlines": "近期重要新闻列表"
-        }
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "string_agentloop_egzm5d",
+      "type": "string",
+      "name": "AgentLoop-Agent-数据采集",
+      "position": [
+        60,
+        -260
+      ],
+      "config": {
+        "value": "name: \"trading_collect\"\ndescription: \"trading 数据采集阶段\"\nloop_end_max_retry: 3\nhooks:\n  on_loop_start:\n    - injection:\n        content: \"你的专属工作目录（沙盒绝对路径）是：@TASKSPACE。完成本阶段的分析与产出后，请把结构化结果（JSON 对象，字段：company_info（公司基础行情与宏观状态），price_data（最新报价数据），news_headlines（近期重要新闻列表））写入 @TASKSPACE/summary.txt 。\"\n  on_loop_end:\n    - file_operation:\n        path: \"@TASKSPACE/summary.txt\"\n        action: \"exist_check\"\n        failed_prompt: \"未检测到你专属工作目录下的 summary.txt。请把本阶段的结构化结果写入该文件后再结束。\""
       }
     },
     {
@@ -470,17 +459,14 @@
             "required": true
           },
           {
-            "name": "target_files",
-            "type": "string",
+            "name": "agentloop",
+            "type": [
+              "string",
+              "jsonstring",
+              "any"
+            ],
             "port_type": "static",
-            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
-            "required": false
-          },
-          {
-            "name": "task_done_info",
-            "type": "string",
-            "port_type": "static",
-            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "description": "符合 YAML 格式的 agentloop（范式）；也可传范式名或绝对路径。",
             "required": false
           }
         ],
@@ -498,28 +484,20 @@
             "description": "任务完成的总结信息"
           }
         ],
-        "configSchema": [
-          {
-            "name": "target_files",
-            "type": "string",
-            "label": "强制验收文件列表",
-            "default": "",
-            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
-          },
-          {
-            "name": "task_done_info",
-            "type": "json",
-            "label": "任务完结强校验字段 (JSON)",
-            "default": {},
-            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
-          }
-        ],
-        "dynamic_inputs": [],
-        "task_done_info": {
-          "bias": "看多/看空",
-          "valuation_result": "资金主力定位结论",
-          "analysis": "期权异动正文分析"
-        }
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "string_agentloop_qjnp6d",
+      "type": "string",
+      "name": "AgentLoop-Agent-资金面",
+      "position": [
+        1292,
+        -830
+      ],
+      "config": {
+        "value": "name: \"trading_fund\"\ndescription: \"trading 资金面分析阶段\"\nloop_end_max_retry: 3\nhooks:\n  on_loop_start:\n    - injection:\n        content: \"你的专属工作目录（沙盒绝对路径）是：@TASKSPACE。完成本阶段的分析与产出后，请把结构化结果（JSON 对象，字段：bias（看多/看空），valuation_result（资金主力定位结论），analysis（期权异动正文分析））写入 @TASKSPACE/summary.txt 。\"\n  on_loop_end:\n    - file_operation:\n        path: \"@TASKSPACE/summary.txt\"\n        action: \"exist_check\"\n        failed_prompt: \"未检测到你专属工作目录下的 summary.txt。请把本阶段的结构化结果写入该文件后再结束。\""
       }
     },
     {
@@ -638,17 +616,14 @@
             "required": true
           },
           {
-            "name": "target_files",
-            "type": "string",
+            "name": "agentloop",
+            "type": [
+              "string",
+              "jsonstring",
+              "any"
+            ],
             "port_type": "static",
-            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
-            "required": false
-          },
-          {
-            "name": "task_done_info",
-            "type": "string",
-            "port_type": "static",
-            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "description": "符合 YAML 格式的 agentloop（范式）；也可传范式名或绝对路径。",
             "required": false
           }
         ],
@@ -666,28 +641,20 @@
             "description": "任务完成的总结信息"
           }
         ],
-        "configSchema": [
-          {
-            "name": "target_files",
-            "type": "string",
-            "label": "强制验收文件列表",
-            "default": "",
-            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
-          },
-          {
-            "name": "task_done_info",
-            "type": "json",
-            "label": "任务完结强校验字段 (JSON)",
-            "default": {},
-            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
-          }
-        ],
-        "dynamic_inputs": [],
-        "task_done_info": {
-          "trend": "上涨/下跌/震荡",
-          "key_levels": "关键技术支撑/阻力",
-          "analysis": "技术指标正文分析"
-        }
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "string_agentloop_5bx0s6",
+      "type": "string",
+      "name": "AgentLoop-Agent-技术面",
+      "position": [
+        1302,
+        -320
+      ],
+      "config": {
+        "value": "name: \"trading_tech\"\ndescription: \"trading 技术面分析阶段\"\nloop_end_max_retry: 3\nhooks:\n  on_loop_start:\n    - injection:\n        content: \"你的专属工作目录（沙盒绝对路径）是：@TASKSPACE。完成本阶段的分析与产出后，请把结构化结果（JSON 对象，字段：trend（上涨/下跌/震荡），key_levels（关键技术支撑/阻力），analysis（技术指标正文分析））写入 @TASKSPACE/summary.txt 。\"\n  on_loop_end:\n    - file_operation:\n        path: \"@TASKSPACE/summary.txt\"\n        action: \"exist_check\"\n        failed_prompt: \"未检测到你专属工作目录下的 summary.txt。请把本阶段的结构化结果写入该文件后再结束。\""
       }
     },
     {
@@ -806,17 +773,14 @@
             "required": true
           },
           {
-            "name": "target_files",
-            "type": "string",
+            "name": "agentloop",
+            "type": [
+              "string",
+              "jsonstring",
+              "any"
+            ],
             "port_type": "static",
-            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
-            "required": false
-          },
-          {
-            "name": "task_done_info",
-            "type": "string",
-            "port_type": "static",
-            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "description": "符合 YAML 格式的 agentloop（范式）；也可传范式名或绝对路径。",
             "required": false
           }
         ],
@@ -834,28 +798,20 @@
             "description": "任务完成的总结信息"
           }
         ],
-        "configSchema": [
-          {
-            "name": "target_files",
-            "type": "string",
-            "label": "强制验收文件列表",
-            "default": "",
-            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
-          },
-          {
-            "name": "task_done_info",
-            "type": "json",
-            "label": "任务完结强校验字段 (JSON)",
-            "default": {},
-            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
-          }
-        ],
-        "dynamic_inputs": [],
-        "task_done_info": {
-          "sentiment_score": "情绪极性(看涨/看跌/中性)",
-          "catalysts": "近期新闻或社群催化剂",
-          "analysis": "舆情正文分析"
-        }
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "string_agentloop_yx5ayh",
+      "type": "string",
+      "name": "AgentLoop-Agent-情绪面",
+      "position": [
+        1310,
+        230
+      ],
+      "config": {
+        "value": "name: \"trading_sentiment\"\ndescription: \"trading 情绪面分析阶段\"\nloop_end_max_retry: 3\nhooks:\n  on_loop_start:\n    - injection:\n        content: \"你的专属工作目录（沙盒绝对路径）是：@TASKSPACE。完成本阶段的分析与产出后，请把结构化结果（JSON 对象，字段：sentiment_score（情绪极性(看涨/看跌/中性)），catalysts（近期新闻或社群催化剂），analysis（舆情正文分析））写入 @TASKSPACE/summary.txt 。\"\n  on_loop_end:\n    - file_operation:\n        path: \"@TASKSPACE/summary.txt\"\n        action: \"exist_check\"\n        failed_prompt: \"未检测到你专属工作目录下的 summary.txt。请把本阶段的结构化结果写入该文件后再结束。\""
       }
     },
     {
@@ -1090,17 +1046,14 @@
             "required": true
           },
           {
-            "name": "target_files",
-            "type": "string",
+            "name": "agentloop",
+            "type": [
+              "string",
+              "jsonstring",
+              "any"
+            ],
             "port_type": "static",
-            "description": "动态传入的目标文件路径 (支持 List 列表 或 逗号分隔的 String)",
-            "required": false
-          },
-          {
-            "name": "task_done_info",
-            "type": "string",
-            "port_type": "static",
-            "description": "动态注入的完成规则，可由前置节点动态决定输出格式",
+            "description": "符合 YAML 格式的 agentloop（范式）；也可传范式名或绝对路径。",
             "required": false
           }
         ],
@@ -1118,28 +1071,20 @@
             "description": "任务完成的总结信息"
           }
         ],
-        "configSchema": [
-          {
-            "name": "target_files",
-            "type": "string",
-            "label": "强制验收文件列表",
-            "default": "",
-            "description": "需要强制校验生成的沙盒绝对路径。多个文件请用英文逗号 (,) 分隔。必须以 /agent_vm 开头。若留空，则不进行文件校验，直接产出总结。"
-          },
-          {
-            "name": "task_done_info",
-            "type": "json",
-            "label": "任务完结强校验字段 (JSON)",
-            "default": {},
-            "description": "配置要求大模型完结时必须输出的 JSON 键值对。例如: {\"summary\": \"总结\", \"score\": \"评分\"}"
-          }
-        ],
-        "dynamic_inputs": [],
-        "task_done_info": {
-          "action": "Buy/Sell/Hold",
-          "confidence": "0-100",
-          "final_reason": "核心决策逻辑"
-        }
+        "configSchema": [],
+        "dynamic_inputs": []
+      }
+    },
+    {
+      "id": "string_agentloop_5d9yxg",
+      "type": "string",
+      "name": "AgentLoop-Agent-PM决策",
+      "position": [
+        3016,
+        -360
+      ],
+      "config": {
+        "value": "name: \"trading_decision\"\ndescription: \"trading PM 决策阶段\"\nloop_end_max_retry: 3\nhooks:\n  on_loop_start:\n    - injection:\n        content: \"你的专属工作目录（沙盒绝对路径）是：@TASKSPACE。完成本阶段的分析与产出后，请把结构化结果（JSON 对象，字段：action（Buy/Sell/Hold），confidence（0-100），final_reason（核心决策逻辑））写入 @TASKSPACE/summary.txt 。\"\n  on_loop_end:\n    - file_operation:\n        path: \"@TASKSPACE/summary.txt\"\n        action: \"exist_check\"\n        failed_prompt: \"未检测到你专属工作目录下的 summary.txt。请把本阶段的结构化结果写入该文件后再结束。\""
       }
     },
     {
@@ -1386,7 +1331,7 @@
         -307
       ],
       "config": {
-        "value": "请为股票 【{{ticker}}】 收集所有必要的原始数据（基础信息、量价数据、近期新闻）。收集完毕后，使用 task_done 工具输出包含所有数据的结构化 summary。\n\n可用的参考工具：{{mcp}}"
+        "value": "请为股票 【{{ticker}}】 收集所有必要的原始数据（基础信息、量价数据、近期新闻）。收集完毕后，请把结构化数据写入你专属工作目录下的 summary.txt（路径见系统提示）。\n\n可用的参考工具：{{mcp}}"
       }
     },
     {
@@ -1612,6 +1557,36 @@
       "sourceHandle": "text",
       "target": "template_renderer_v0nlop",
       "targetHandle": "template"
+    },
+    {
+      "source": "string_agentloop_egzm5d",
+      "sourceHandle": "text",
+      "target": "agent_loop_egzm5d",
+      "targetHandle": "agentloop"
+    },
+    {
+      "source": "string_agentloop_qjnp6d",
+      "sourceHandle": "text",
+      "target": "agent_loop_qjnp6d",
+      "targetHandle": "agentloop"
+    },
+    {
+      "source": "string_agentloop_5bx0s6",
+      "sourceHandle": "text",
+      "target": "agent_loop_5bx0s6",
+      "targetHandle": "agentloop"
+    },
+    {
+      "source": "string_agentloop_yx5ayh",
+      "sourceHandle": "text",
+      "target": "agent_loop_yx5ayh",
+      "targetHandle": "agentloop"
+    },
+    {
+      "source": "string_agentloop_5d9yxg",
+      "sourceHandle": "text",
+      "target": "agent_loop_5d9yxg",
+      "targetHandle": "agentloop"
     }
   ],
   "dependencies": {
